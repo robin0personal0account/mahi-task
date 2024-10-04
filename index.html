@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mahi's Task Tracker</title>
+  <style>
+    /* Global Styles */
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #f0f4f8;
+      color: #333;
+      margin: 0;
+      padding: 0;
+    }
+
+    h1 {
+      font-size: 2rem;
+      color: #3b3b98;
+      margin: 10px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    /* Progress Bar */
+    .progress-container {
+      width: 100%;
+      background-color: #e3e7ed;
+      border-radius: 10px;
+      height: 20px;
+      position: relative;
+      margin: 20px 0;
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(45deg, #6a89cc, #00b894);
+      width: 0;
+      transition: width 0.5s ease;
+      border-radius: 10px;
+    }
+
+    .progress-emoji {
+      position: absolute;
+      top: -30px;
+      right: 0;
+      font-size: 1.8rem;
+      transition: right 0.5s ease;
+    }
+
+    /* Task Card */
+    .task-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 15px;
+    }
+
+    .task-card {
+      background-color: #ffffff;
+      border-radius: 15px;
+      padding: 15px;
+      box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease;
+      text-align: center;
+    }
+
+    .task-card:hover {
+      transform: scale(1.05);
+    }
+
+    .task-card img {
+      width: 50px;
+      height: 50px;
+      object-fit: cover;
+      border-radius: 50%;
+      margin-bottom: 10px;
+    }
+
+    .task-card p {
+      font-size: 1rem;
+      color: #555;
+    }
+
+    /* Add Task Button */
+    .add-task-btn {
+      background-color: #00cec9;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      font-size: 1rem;
+      border-radius: 20px;
+      margin-top: 20px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .add-task-btn:hover {
+      background-color: #0984e3;
+    }
+
+    /* Task Form */
+    .task-form {
+      display: none;
+      background-color: #f1f2f6;
+      border-radius: 10px;
+      padding: 15px;
+      margin-top: 20px;
+    }
+
+    .task-form input {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 5px;
+      border: 1px solid #dcdde1;
+    }
+
+    .task-form button {
+      width: 100%;
+      padding: 10px;
+      background-color: #00cec9;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    /* Streak and Reward */
+    .streak-counter {
+      font-size: 1.2rem;
+      color: #3b3b98;
+      margin: 15px 0;
+    }
+
+    .reward {
+      display: none;
+      background-color: #6a89cc;
+      color: white;
+      padding: 15px;
+      border-radius: 10px;
+      margin-top: 20px;
+      font-size: 1.2rem;
+    }
+
+    /* Reminder */
+    .reminder {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #3b3b98;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 25px;
+      font-size: 1rem;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease;
+    }
+
+    .reminder.show {
+      transform: translate(-50%, 0);
+    }
+
+    /* Responsive Styles */
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 1.5rem;
+      }
+
+      .task-card {
+        padding: 10px;
+      }
+
+      .task-card img {
+        width: 40px;
+        height: 40px;
+      }
+
+      .add-task-btn {
+        padding: 8px 15px;
+        font-size: 0.9rem;
+      }
+
+      .task-form input,
+      .task-form button {
+        font-size: 0.9rem;
+      }
+
+      .progress-emoji {
+        top: -25px;
+        font-size: 1.5rem;
+      }
+
+      .streak-counter {
+        font-size: 1rem;
+      }
+
+      .reward {
+        font-size: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>Mahi's Task Tracker</h1>
+
+    <!-- Progress Bar -->
+    <div class="progress-container">
+      <div class="progress-bar" id="progress-bar"></div>
+      <div class="progress-emoji" id="progress-emoji">😊</div>
+    </div>
+
+    <!-- Task List -->
+    <div class="task-list" id="task-list"></div>
+
+    <!-- Add Task Button -->
+    <button class="add-task-btn" onclick="showTaskForm()">+ Add Task</button>
+
+    <!-- Task Form -->
+    <div id="task-form" class="task-form">
+      <input type="text" id="task-name" placeholder="Task Name">
+      <input type="file" id="task-image" accept="image/*">
+      <button onclick="addTask()">Add Task</button>
+    </div>
+
+    <!-- Streak Counter -->
+    <div class="streak-counter" id="streak-counter">Daily Streak: 0 🔥</div>
+
+    <!-- Reward -->
+    <div class="reward" id="reward">🎉 You completed all tasks! 🎉</div>
+
+  </div>
+
+  <!-- Reminder Banner -->
+  <div class="reminder" id="reminder">Don't forget to complete your tasks today! 🎯</div>
+
+  <script>
+    let progress = 0;
+    let streak = 0;
+
+    window.onload = function() {
+      loadTasks();
+      loadProgressAndStreak();
+    };
+
+    function completeTask(card, value) {
+      card.style.backgroundColor = '#dfe6e9';
+      progress += value;
+
+      const progressBar = document.getElementById('progress-bar');
+      const progressEmoji = document.getElementById('progress-emoji');
+      progressBar.style.width = progress + '%';
+      progressEmoji.style.right = (100 - progress) + '%';
+
+      if (progress < 40) {
+        progressEmoji.innerHTML = '😊';
+      } else if (progress < 80) {
+        progressEmoji.innerHTML = '😃';
+      } else {
+        progressEmoji.innerHTML = '🎉';
+      }
+
+      if (progress >= 100) {
+        document.getElementById('reward').style.display = 'block';
+        streak += 1;
+        document.getElementById('streak-counter').innerHTML = `Daily Streak: ${streak} 🔥`;
+      }
+
+      saveProgressAndStreak();
+    }
+
+    function showTaskForm() {
+      document.getElementById('task-form').style.display = 'block';
+    }
+
+    function addTask() {
+      const taskName = document.getElementById('task-name').value;
+      const taskImage = document.getElementById('task-image').files[0];
+      const taskList = document.getElementById('task-list');
+
+      if (taskName && taskImage) {
+        const newTask = document.createElement('div');
+        newTask.classList.add('task-card');
+        newTask.onclick = () => completeTask(newTask, 20);
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          newTask.innerHTML = `
+            <img src="${e.target.result}" alt="${taskName}">
+            <p>${taskName}</p>
+          `;
+          taskList.appendChild(newTask);
+          saveTaskToLocalStorage(taskName, e.target.result);
+        };
+        reader.readAsDataURL(taskImage);
+
+        document.getElementById('task-name').value = '';
+        document.getElementById('task-form').style.display = 'none';
+      }
+    }
+
+    function saveTaskToLocalStorage(name, image) {
+      const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+      tasks.push({ name, image });
+      localStorage.setItem('tasks', JSON.stringify(tasks));
+    }
+
+    function loadTasks() {
+      const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+      const taskList = document.getElementById('task-list');
+
+      tasks.forEach(task => {
+        const taskCard = document.createElement('div');
+        taskCard.classList.add('task-card');
+        taskCard.onclick = () => completeTask(taskCard, 20);
+        taskCard.innerHTML = `
+          <img src="${task.image}" alt="${task.name}">
+          <p>${task.name}</p>
+        `;
+        taskList.appendChild(taskCard);
+      });
+    }
+
+    function saveProgressAndStreak() {
+      localStorage.setItem('progress', progress);
+      localStorage.setItem('streak', streak);
+    }
+
+    function loadProgressAndStreak() {
+      progress = Number(localStorage.getItem('progress')) || 0;
+      streak = Number(localStorage.getItem('streak')) || 0;
+
+      const progressBar = document.getElementById('progress-bar');
+      const progressEmoji = document.getElementById('progress-emoji');
+      progressBar.style.width = progress + '%';
+      progressEmoji.style.right = (100 - progress) + '%';
+
+      document.getElementById('streak-counter').innerHTML = `Daily Streak: ${streak} 🔥`;
+    }
+
+    setTimeout(() => {
+      document.getElementById('reminder').classList.add('show');
+    }, 5000);
+  </script>
+
+</body>
+</html>
